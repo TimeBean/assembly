@@ -8,7 +8,7 @@ section .data
 
 section .text
 _start:
-    mov rax, 1      ; system call "type" adress; 1 - sys_write
+    mov rax, 1      ; system call "type" address; 1 - sys_write
     mov rdi, 1      ; 0 - stdin; 1 - stdout; 2 - stderr;
     mov rsi, msg 
     mov rdx, len
