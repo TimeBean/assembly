@@ -1,7 +1,14 @@
 global _start
 
 section .data
-    msg db "one expression simple calculator", 10, "enter expression > "
+    msg db 27, "[1;38;5;10;49m", "One expression simple calculator:", 27, "[0;39;49m", 10, \
+           27, "[90m", "syntax: {num} {opr} {num} ", 27, "[0;39;49m", 10, \
+           "{opr} + addition", 10, \
+           "{opr} - subtraction", 10, \
+           "{opr} * multiplication", 10, \
+           "{opr} / integer division", 10, \
+           27, "[4;38;5;2;49m", "only positive numbers", 27, "[0;39;49m", 10, 10, \
+           "enter expression > "
     msg_len equ $ - msg
 
 section .bss
@@ -75,6 +82,10 @@ snm_loop:
     je do_add
     cmp al, '-'
     je do_sub
+    cmp al, '*'
+    je do_mul
+    cmp al, '/'
+    je do_div
     jmp exit            ; unknown opr - exit
 
 do_add:
@@ -83,6 +94,19 @@ do_add:
 
 do_sub:
     sub r8, r9
+    jmp print_result
+
+do_mul:
+    mov rax, r8        
+    mul r9            
+    mov r8, rax      
+    jmp print_result
+
+do_div:
+    mov rax, r8     
+    xor rdx, rdx   
+    div r9        
+    mov r8, rax  
     jmp print_result
 
 print_result:
