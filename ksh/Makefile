@@ -1,28 +1,40 @@
-ASM      = nasm
-LD       = ld
-ASMFLAGS = -f elf64 -g
-LDFLAGS  =
+.SUFFIXES:
+MAKEFLAGS += --no-builtin-rules
 
-TARGET   = ksh
-SRC_DIR  = src
-BUILD_DIR= build
+AS = nasm
+ASFLAGS = -f elf64
+LD = ld
+LDFLAGS =
 
-SRCS = $(wildcard $(SRC_DIR)/*.asm)
-OBJS = $(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.o,$(SRCS))
+TARGET = ksh
+BUILD_DIR = build
+
+SOURCES = src/io.asm src/main.asm 
+OBJECTS = $(BUILD_DIR)/io.o $(BUILD_DIR)/main.o $(BUILD_DIR)/utils.o
+
+.PHONY: all clean run
 
 all: $(TARGET)
-
-$(TARGET): $(OBJS)
-	$(LD) $(OBJS) -o $(TARGET) $(LDFLAGS)
-
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm
-	mkdir -p $(BUILD_DIR)
-	$(ASM) $(ASMFLAGS) $< -o $@
+	rm -rf $(BUILD_DIR)
 
 run: $(TARGET)
+	rm -rf $(BUILD_DIR)
 	./$(TARGET)
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(BUILD_DIR)/io.o: src/io.asm | $(BUILD_DIR)
+	$(AS) $(ASFLAGS) $< -o $@
+
+$(BUILD_DIR)/main.o: src/main.asm include/io.inc | $(BUILD_DIR)
+	$(AS) $(ASFLAGS) $< -o $@
+
+$(BUILD_DIR)/utils.o: src/utils.asm | $(BUILD_DIR)
+	$(AS) $(ASFLAGS) $< -o $@
+
+$(TARGET): $(OBJECTS)
+	$(LD) $(LDFLAGS) $(OBJECTS) -o $@
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
-
-.PHONY: all run clean
